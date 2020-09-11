@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,9 +23,9 @@ import java.util.logging.Logger;
 public class SingleGPAServer {
     
     private static final HashMap<String,Double>GPA_TABLE;
-    DataInputStream fromClient = null;
-    DataOutputStream toClient = null;
-    ServerSocket server = null;
+    private DataInputStream fromClient = null;
+    private DataOutputStream toClient = null;
+    private ServerSocket server = null;
     
     static {
         GPA_TABLE = new HashMap<>();
@@ -56,13 +57,12 @@ public class SingleGPAServer {
             while(notFinished(clientMessage)) {
                 
                 String reply = calculateGPA(clientMessage);
-                toClient.writeUTF("Done");
+                toClient.writeUTF(reply);
                 
                 clientMessage = fromClient.readUTF();
                 System.out.println("Recieved message from client:  " + clientMessage);
             }
             
-            toClient.writeUTF("stop confirmed");
             socket.close();
             server.close();
             toClient.close();
@@ -91,27 +91,39 @@ public class SingleGPAServer {
     }
     
     private boolean notFinished(String clientMessage) {
-        return !clientMessage.trim().equals("stop"); 
+        return !clientMessage.trim().equals("Ok"); 
     }
     
     private String calculateGPA(String clientMessage) {
         
-        String[] grades = clientMessage.split(", ");
-        for(String g: grades) {
-            System.out.println(g);
+        String[] message = clientMessage.split(", ");
+        int numGrades = Character.getNumericValue(message[0].charAt(0));
+        int i;
+        int semesterCredits = 0;
+        double semesterTotal = 0;
+        
+        for (i = 1; i < numGrades * 2; i+=2) {
+            semesterCredits += Integer.parseInt(message[i+1]);
+            semesterTotal += (GPA_TABLE.get(message[i]) * Integer.parseInt(message[i+1]));
         }
         
-        return "Done";
-    }
-    
-    private String getSum(String message) {
-        int length = Character.getNumericValue(message.charAt(0));
-        int sum = 0;
+        DecimalFormat df = new DecimalFormat("#.##");
+        String semesterGPA = df.format(semesterTotal / semesterCredits);
         
-        for(int i = 0; i < length; i++) {
-            sum += Character.getNumericValue(message.charAt(i + 1));
+        double prevGPA = Double.parseDouble(message[i++]);
+        int prevCreditHrs = Integer.parseInt(message[i]);
+        double cumulativeGPANum = ((prevGPA * prevCreditHrs) + semesterTotal) / (prevCreditHrs += semesterCredits);
+        String cumulativeGPA = df.format(cumulativeGPANum);
+        
+        return semesterGPA + ", " + cumulativeGPA + ", " + String.valueOf(prevCreditHrs);
+        
+        /*
+        int real = 0;
+        
+        for(i = 0; i < numGrades; i++) {
+            System.out.println(grades[real + 1] + " " + grades[real+2]);
+            real+=2;
         }
-        
-        return String.valueOf(sum);
+        */
     }   
 }

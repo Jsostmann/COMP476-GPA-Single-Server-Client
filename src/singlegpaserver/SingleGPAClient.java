@@ -21,32 +21,34 @@ import java.util.logging.Logger;
  */
 public class SingleGPAClient {
     
-    DataInputStream fromServer = null;
-    DataOutputStream toServer = null;
-    Socket socket = null;
+    private DataInputStream fromServer = null;
+    private DataOutputStream toServer = null;
+    private Socket socket = null;
    
     public static void main(String[] args) {
-        new SingleGPAClient(9876,new String[] {"4, A-, 3, A, 3, C+, 4, B, 3, 2.88, 46"});
+        new SingleGPAClient(9876,new String[] {"4, A-, 3, A, 3, C+, 4, B, 3, 2.88, 46",
+                                               "5, A, 3, B+, 4, A, 1, C, 3, A-, 3, 3.12, 75"});
     }
     public SingleGPAClient(int port,String[] messages) {
         try {
             socket = new Socket(InetAddress.getLocalHost(),port);
             fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             toServer = new DataOutputStream(socket.getOutputStream());
-            System.out.println(socket.getInetAddress());
             
             for(int i = 0; i < messages.length; i++) {
+                
                 System.out.println("Sending data to server...");
                 toServer.writeUTF(messages[i]);
+                
                 String answer = fromServer.readUTF();
-                System.out.println("Recieved message from Server: " + answer);
-
+                String[] values = answer.split(", ");
+                System.out.println("Semester GPA : " + values[0]);
+                System.out.println("Cumulative GPA: " + values[1]);
+                System.out.println("Total Credits: " + values[2]);
+                
             }
             System.out.println("Sending stop to server...");
-            toServer.writeUTF("stop");
-            String answer = fromServer.readUTF();
-            System.out.println("Recieved stop confirmation from server: " + answer);
-            
+            toServer.writeUTF("Ok");            
             
         } catch (UnknownHostException ex) {
             Logger.getLogger(SingleGPAClient.class.getName()).log(Level.SEVERE, null, ex);
