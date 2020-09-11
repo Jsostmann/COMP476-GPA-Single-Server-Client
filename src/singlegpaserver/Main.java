@@ -13,9 +13,8 @@ public class Main {
     
     public static void main(String[] args) {
         
-        new SingleGPAServer(9876);
-       
-        
+        //SingleGPAServer server = new SingleGPAServer(9876);
+        //SingleGPAClient client = new SingleGPAClient("127.0.0.0", 9876,new String[] {"4, A-, 3, A, 3, C+, 4, B, 3, 2.88, 46"});
     }
     
 }

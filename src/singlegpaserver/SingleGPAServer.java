@@ -9,8 +9,6 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -24,8 +22,8 @@ import java.util.logging.Logger;
 public class SingleGPAServer {
     
     private static final HashMap<String,Double>GPA_TABLE;
-    DataInputStream from = null;
-    DataOutputStream to = null;
+    DataInputStream fromClient = null;
+    DataOutputStream toClient = null;
     ServerSocket server = null;
     
     static {
@@ -33,9 +31,13 @@ public class SingleGPAServer {
         initTable();
     }
 
+    
+    public static void main(String[] args) {
+        new SingleGPAServer(9876);
+    }
+    
     public SingleGPAServer(int port) {
-        
-        
+      
         try {
         
             server = new ServerSocket(port);
@@ -44,27 +46,29 @@ public class SingleGPAServer {
             Socket socket = server.accept();
             System.out.println("Accepted connection from Client");
             
-            from = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            to = new DataOutputStream(socket.getOutputStream());
+            fromClient = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            toClient = new DataOutputStream(socket.getOutputStream());
             
-            String clientMessage = from.readUTF();
+            String clientMessage = fromClient.readUTF();
             
             System.out.println("Recieved message from client:  " + clientMessage);
             
             while(notFinished(clientMessage)) {
                 
                 String reply = calculateGPA(clientMessage);
-                to.writeUTF("Done");
+                toClient.writeUTF("Done");
                 
-                clientMessage = from.readUTF();
+                clientMessage = fromClient.readUTF();
                 System.out.println("Recieved message from client:  " + clientMessage);
             }
             
+            toClient.writeUTF("stop confirmed");
             socket.close();
-            to.close();
-            from.close();
+            server.close();
+            toClient.close();
+            fromClient.close();
             
-            System.out.println("Server closed");
+            System.out.println("Server and Socket closed");
             
         } catch (IOException ex) {
             Logger.getLogger(SingleGPAServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -92,7 +96,7 @@ public class SingleGPAServer {
     
     private String calculateGPA(String clientMessage) {
         
-        String[] grades = clientMessage.split(",");
+        String[] grades = clientMessage.split(", ");
         for(String g: grades) {
             System.out.println(g);
         }
