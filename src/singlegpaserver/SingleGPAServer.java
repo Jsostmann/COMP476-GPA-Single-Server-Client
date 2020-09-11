@@ -32,7 +32,6 @@ public class SingleGPAServer {
         GPA_TABLE = new HashMap<>();
         initTable();
     }
-    //private static int port = 9876;
 
     public SingleGPAServer(int port) {
         
@@ -53,11 +52,19 @@ public class SingleGPAServer {
             System.out.println("Recieved message from client:  " + clientMessage);
             
             while(notFinished(clientMessage)) {
-                String reply = calculateGPA(clientMessage);
                 
+                String reply = calculateGPA(clientMessage);
+                to.writeUTF("Done");
+                
+                clientMessage = from.readUTF();
+                System.out.println("Recieved message from client:  " + clientMessage);
             }
             
+            socket.close();
+            to.close();
+            from.close();
             
+            System.out.println("Server closed");
             
         } catch (IOException ex) {
             Logger.getLogger(SingleGPAServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,6 +92,12 @@ public class SingleGPAServer {
     
     private String calculateGPA(String clientMessage) {
         
+        String[] grades = clientMessage.split(",");
+        for(String g: grades) {
+            System.out.println(g);
+        }
+        
+        return "Done";
     }
     
     private String getSum(String message) {
@@ -96,41 +109,5 @@ public class SingleGPAServer {
         }
         
         return String.valueOf(sum);
-    }
-    
-    public static void main(String args[]) throws IOException, ClassNotFoundException {
-        server = new ServerSocket(port);
-        while (true) {
-            System.out.println("Waiting for the client....");
-            
-            // Accept new connection
-            Socket socket = server.accept();
-            
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-            String message = (String) ois.readObject();
-            
-            
-            System.out.println("Message Received: " + message);
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            String reply = "Done";
-            if (!message.equalsIgnoreCase("exit")){
-                reply = getSum(message);
-            }
-            oos.writeObject("Hi Client your sum is..." + reply);
-            ois.close();
-            oos.close();
-            socket.close();
-            
-            if (message.equalsIgnoreCase("exit")) {
-                break;
-            }
-        }
-        
-        System.out.println ("Shutting down Socket server!!");
-        server.close();
-        
-    }
-    
+    }   
 }
-
-
