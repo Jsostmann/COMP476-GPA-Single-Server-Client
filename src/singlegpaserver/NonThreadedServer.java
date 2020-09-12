@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author jamesostmann
  */
-public class SingleGPAServer {
+public class NonThreadedServer {
     
     private static final HashMap<String,Double>GPA_TABLE;
     private DataInputStream fromClient = null;
@@ -34,10 +34,10 @@ public class SingleGPAServer {
 
     
     public static void main(String[] args) {
-        new SingleGPAServer(9876);
+        new NonThreadedServer(9876);
     }
     
-    public SingleGPAServer(int port) {
+    public NonThreadedServer(int port) {
       
         try {
         
@@ -71,7 +71,7 @@ public class SingleGPAServer {
             System.out.println("Server and Socket closed");
             
         } catch (IOException ex) {
-            Logger.getLogger(SingleGPAServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(NonThreadedServer.class.getName()).log(Level.SEVERE, null, ex);
         } 
     }
     

@@ -19,17 +19,17 @@ import java.util.logging.Logger;
  *
  * @author jamesostmann
  */
-public class SingleGPAClient {
+public class Client {
     
     private DataInputStream fromServer = null;
     private DataOutputStream toServer = null;
     private Socket socket = null;
    
     public static void main(String[] args) {
-        new SingleGPAClient(9876,new String[] {"4, A-, 3, A, 3, C+, 4, B, 3, 2.88, 46",
+        new Client(9876,new String[] {"4, A-, 3, A, 3, C+, 4, B, 3, 2.88, 46",
                                                "5, A, 3, B+, 4, A, 1, C, 3, A-, 3, 3.12, 75"});
     }
-    public SingleGPAClient(int port,String[] messages) {
+    public Client(int port,String[] messages) {
         try {
             socket = new Socket(InetAddress.getLocalHost(),port);
             fromServer = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -51,9 +51,9 @@ public class SingleGPAClient {
             toServer.writeUTF("Ok");            
             
         } catch (UnknownHostException ex) {
-            Logger.getLogger(SingleGPAClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(SingleGPAClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
    
